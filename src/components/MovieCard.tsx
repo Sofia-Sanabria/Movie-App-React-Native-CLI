@@ -1,14 +1,19 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Movie } from '../types/movie';
 
 interface MovieCardProps {
   movie: Movie;
+  onPress: () => void;
 }
 
-export function MovieCard({ movie }: MovieCardProps) {
+export function MovieCard({ movie, onPress }: MovieCardProps) {
   return (
-    <View style={styles.card}>
+    <Pressable
+      style={styles.card}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Ver detalle de ${movie.title}`}>
       {movie.poster_path ? (
         <Image
           source={{
@@ -33,7 +38,7 @@ export function MovieCard({ movie }: MovieCardProps) {
           ★ {movie.vote_average.toFixed(1)} / 10
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
