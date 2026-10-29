@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 jest.mock('react-native-config', () => ({
   __esModule: true,
   default: {

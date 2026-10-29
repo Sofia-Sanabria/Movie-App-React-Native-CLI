@@ -1,7 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-
+import type { MovieDetails, MoviesResponse } from '../types/movie';
 import { env } from '../config/env';
-import { MoviesResponse } from '../types/movie';
 
 export const tmdbApi = createApi({
   reducerPath: 'tmdbApi',
@@ -27,7 +26,16 @@ export const tmdbApi = createApi({
         },
       }),
     }),
+
+    getMovieDetails: builder.query<MovieDetails, number>({
+      query: movieId => ({
+        url: `movie/${movieId}`,
+        params: {
+          language: 'es-ES',
+        },
+      }),
+    }),
   }),
 });
 
-export const { useGetPopularMoviesQuery } = tmdbApi;
+export const { useGetPopularMoviesQuery, useGetMovieDetailsQuery } = tmdbApi;

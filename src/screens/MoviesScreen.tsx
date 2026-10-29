@@ -7,11 +7,14 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../navigation/types';
 import { MovieCard } from '../components/MovieCard';
 import { useGetPopularMoviesQuery } from '../services/tmdbApi';
 
-export function MoviesScreen() {
+type Props = NativeStackScreenProps<RootStackParamList, 'Movies'>;
+
+export function MoviesScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { data, isLoading, isError, refetch } = useGetPopularMoviesQuery(1);
 
@@ -48,7 +51,14 @@ export function MoviesScreen() {
         <FlatList
           data={data?.results ?? []}
           keyExtractor={item => String(item.id)}
-          renderItem={({ item }) => <MovieCard movie={item} />}
+          renderItem={({ item }) => (
+            <MovieCard
+              movie={item}
+              onPress={() =>
+                navigation.navigate('MovieDetails', { movieId: item.id })
+              }
+            />
+          )}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <View style={styles.centered}>
