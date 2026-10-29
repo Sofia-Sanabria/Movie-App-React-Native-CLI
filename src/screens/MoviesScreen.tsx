@@ -17,6 +17,7 @@ import {
 } from '../services/tmdbApi';
 import { useState } from 'react';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
+import { TmdbCredits } from '../components/TmdbCredits';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Movies'>;
 
@@ -101,6 +102,7 @@ export function MoviesScreen({ navigation }: Props) {
             />
           )}
           contentContainerStyle={styles.listContent}
+          ListFooterComponent={TmdbCredits}
           ListEmptyComponent={
             <View style={styles.centered}>
               <Text style={styles.message}>
