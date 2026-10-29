@@ -4,19 +4,43 @@ import {
   FlatList,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/types';
 import { MovieCard } from '../components/MovieCard';
-import { useGetPopularMoviesQuery } from '../services/tmdbApi';
+import {
+  useGetPopularMoviesQuery,
+  useSearchMoviesQuery,
+} from '../services/tmdbApi';
+import { useState } from 'react';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Movies'>;
 
 export function MoviesScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const { data, isLoading, isError, refetch } = useGetPopularMoviesQuery(1);
+  const [searchText, setSearchText] = useState('');
+  const normalizedSearch = searchText.trim();
+  const debouncedSearch = useDebouncedValue(normalizedSearch);
+  const isSearching = normalizedSearch.length > 0;
+  const isDebouncing = normalizedSearch !== debouncedSearch;
+
+  const popularQuery = useGetPopularMoviesQuery(1, {
+    skip: isSearching,
+  });
+
+  const searchQuery = useSearchMoviesQuery(debouncedSearch, {
+    skip: !isSearching || isDebouncing || !debouncedSearch,
+  });
+
+  const activeQuery = isSearching ? searchQuery : popularQuery;
+  const { currentData, isError, isFetching, isUninitialized, refetch } =
+    activeQuery;
+
+  const showLoading = isDebouncing || isFetching || isUninitialized;
 
   return (
     <View
@@ -29,9 +53,24 @@ export function MoviesScreen({ navigation }: Props) {
           paddingRight: insets.right + 16,
         },
       ]}>
-      <Text style={styles.heading}>Películas populares</Text>
+      <Text style={styles.heading}>
+        {isSearching ? 'Buscar películas' : 'Películas populares'}
+      </Text>
 
-      {isLoading ? (
+      <TextInput
+        style={styles.searchInput}
+        value={searchText}
+        onChangeText={setSearchText}
+        placeholder="Buscar películas por nombre"
+        placeholderTextColor="#687782"
+        accessibilityLabel="Buscar películas por nombre"
+        autoCapitalize="none"
+        autoCorrect={false}
+        returnKeyType="search"
+        clearButtonMode="while-editing"
+      />
+
+      {showLoading ? (
         <View style={styles.centered}>
           <ActivityIndicator
             size="large"
@@ -49,7 +88,9 @@ export function MoviesScreen({ navigation }: Props) {
         </View>
       ) : (
         <FlatList
-          data={data?.results ?? []}
+          data={currentData?.results ?? []}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           keyExtractor={item => String(item.id)}
           renderItem={({ item }) => (
             <MovieCard
@@ -63,7 +104,9 @@ export function MoviesScreen({ navigation }: Props) {
           ListEmptyComponent={
             <View style={styles.centered}>
               <Text style={styles.message}>
-                No hay películas disponibles.
+                {isSearching
+                  ? 'No encontramos películas con ese nombre.'
+                  : 'No hay películas disponibles.'}
               </Text>
             </View>
           }
@@ -99,5 +142,16 @@ const styles = StyleSheet.create({
   listContent: {
     flexGrow: 1,
     paddingBottom: 16,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#D5DCE2',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 16,
+    fontSize: 16,
+    color: '#17202A',
+    backgroundColor: '#F8F9FA',
   },
 });
