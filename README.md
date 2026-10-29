@@ -1,97 +1,201 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# MangoMovies
 
-# Getting Started
+Aplicación móvil para explorar películas populares, buscar por nombre y consultar sus detalles. Desarrollada como desafío técnico con React Native CLI y TypeScript, compatible con Android e iOS.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Funcionalidades
 
-## Step 1: Start Metro
+- Listado de películas populares con póster, título y valoración.
+- Búsqueda por nombre con debounce de 400 ms.
+- Detalle con imagen ampliada, sinopsis, géneros y fecha de estreno.
+- Estados de carga, error con reintento y lista vacía.
+- Navegación tipada entre listado y detalle.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Tecnologías
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- React Native CLI 0.88.0 y React 19.3.0.
+- TypeScript.
+- React Navigation con Native Stack.
+- Redux Toolkit y RTK Query.
+- react-native-config.
+- Jest y ESLint.
 
-```sh
-# Using npm
-npm start
+## Requisitos
 
-# OR using Yarn
-yarn start
+Entorno utilizado durante el desarrollo:
+
+| Herramienta | Versión |
+| --- | --- |
+| Node.js | 22.23.1 |
+| npm | 10.9.8 |
+| Java JDK | 17 |
+| Xcode | 26.1.1 |
+| Ruby | 3.3.11 |
+| Bundler | 4.0.9 |
+
+Para Android se necesitan Android Studio, Android SDK Platform 37 y Build Tools 37.0.0. El proyecto configura NDK 27.1.12297006.
+
+Para iOS se necesita macOS, Xcode y un simulador instalado. CocoaPods y las demás gemas se instalan mediante Bundler.
+
+## Instalación
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/Sofia-Sanabria/Movies-App-React-Native-CLI.git
+cd Movies-App-React-Native-CLI
 ```
 
-## Step 2: Build and run your app
+Si el repositorio es privado, se requiere acceso autorizado.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### 2. Instalar dependencias
+
+```bash
+npm ci
+```
+
+### 3. Configurar TMDB
+
+Creá una cuenta en [TMDB](https://www.themoviedb.org/) y solicitá acceso a su API desde la configuración de tu cuenta.
+
+Copiá el archivo de ejemplo:
+
+```bash
+cp .env.example .env
+```
+
+Completá `.env` con tu **API Read Access Token**:
+
+```dotenv
+TMDB_BASE_URL=https://api.themoviedb.org/3
+TMDB_READ_ACCESS_TOKEN=tu_token_de_lectura
+```
+
+El token se coloca sin el prefijo `Bearer`.
+
+`.env` está excluido del repositorio. Las variables se incorporan a la aplicación compilada; no constituyen almacenamiento cifrado de secretos.
+
+Después de modificar `.env`, recompilá la aplicación.
+
+### 4. Preparar Android
+
+Configurá el SDK de Android mediante `ANDROID_HOME` o creá `android/local.properties` con la ruta correspondiente a tu equipo:
+
+```properties
+sdk.dir=/ruta/absoluta/al/Android/sdk
+```
+
+En macOS, la ubicación habitual es:
+
+```properties
+sdk.dir=/Users/TU_USUARIO/Library/Android/sdk
+```
+
+Este archivo es local y no debe versionarse.
+
+Iniciá un emulador desde Android Studio o conectá un dispositivo con depuración USB habilitada.
+
+### 5. Preparar iOS
+
+Desde la raíz del proyecto, con Ruby y Bundler disponibles:
+
+```bash
+bundle config set --local path vendor/bundle
+bundle install
+cd ios
+bundle exec pod install
+cd ..
+```
+
+Si abrís el proyecto en Xcode, utilizá:
+
+```text
+ios/MangoMovies.xcworkspace
+```
+
+## Ejecución
+
+Iniciá Metro desde la raíz:
+
+```bash
+npm start
+```
+
+En otra terminal, ubicada en la misma carpeta y con Node configurado, ejecutá:
 
 ### Android
 
-```sh
-# Using npm
+```bash
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
 ### iOS
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
+```bash
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+La primera compilación puede tardar mientras descarga y prepara las dependencias nativas.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+## Estructura
 
-## Step 3: Modify your app
+```text
+src/
+├── assets/       # Recursos gráficos
+├── components/   # Tarjetas y créditos reutilizables
+├── config/       # Configuración de entorno
+├── hooks/        # Debounce reutilizable
+├── navigation/   # Navegador y parámetros tipados
+├── screens/      # Listado y detalle
+├── services/     # Endpoints de TMDB
+├── store/        # Configuración de Redux
+└── types/        # Tipos de las respuestas
+```
 
-Now that you have successfully run the app, let's make changes!
+## Decisiones técnicas
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+**Redux Toolkit + RTK Query:** centralizan las consultas, la caché y los estados de las peticiones, evitando duplicar esa lógica en las pantallas. El texto del buscador permanece como estado local porque pertenece a esa interfaz.
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+**React Navigation Native Stack:** proporciona navegación nativa con parámetros tipados. Entre pantallas se envía únicamente el ID; el detalle obtiene sus datos desde TMDB.
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+**FlatList:** permite renderizar el listado de forma virtualizada y utiliza identificadores estables como claves.
 
-## Congratulations! :tada:
+**Imágenes:** el listado utiliza pósteres de tamaño `w342` y el detalle imágenes `w780`. Se muestra un reemplazo cuando la API no proporciona una ruta de imagen.
 
-You've successfully run and modified your React Native App. :partying_face:
+**Búsqueda:** espera 400 ms desde el último cambio y utiliza los datos correspondientes al término actual para evitar mostrar resultados de otra búsqueda.
 
-### Now what?
+## Verificaciones
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+```bash
+npx tsc --noEmit
+npm run lint
+npm test -- --runInBand
+```
 
-# Troubleshooting
+Las pruebas automatizadas cubren:
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+- Montaje inicial de la aplicación.
+- Espera y reinicio del debounce.
+- Mensaje de lista vacía.
+- Estado de error y acción de reintento.
 
-# Learn More
+También se verificaron manualmente el listado, la búsqueda, la navegación al detalle y el manejo de errores y recuperación de conexión en Android e iOS.
 
-To learn more about React Native, take a look at the following resources:
+Las pruebas unitarias no sustituyen la validación de las compilaciones nativas.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## Alcance actual
+
+- Se consultan películas, no series.
+- El listado y la búsqueda muestran la primera página de resultados.
+- Se necesita conexión a internet para obtener datos nuevos.
+- No se incluye persistencia de la caché entre reinicios ni un modo offline dedicado.
+
+## Créditos
+
+Los datos e imágenes provienen de [TMDB](https://www.themoviedb.org/).
+
+This product uses the TMDB API but is not endorsed or certified by TMDB.
+
+## Autora
+
+Sofia Sanabria  
+[GitHub](https://github.com/Sofia-Sanabria)
